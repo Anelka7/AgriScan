@@ -1,0 +1,11 @@
+env/
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+dataset/
+data_raw/
+*.keras
+modele/saved_model_tmp/

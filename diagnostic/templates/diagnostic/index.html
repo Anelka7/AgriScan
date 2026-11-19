@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2e7d32">
+  <title>AgriScan : Diagnostic du sol</title>
+  <link rel="stylesheet" href="{% static 'diagnostic/style.css' %}">
+  <script src="{% static 'diagnostic/app.js' %}" defer></script>
+</head>
+<body>
+<main class="app">
+
+  <header class="entete">
+    <h1>AgriScan</h1>
+    <p class="sous-titre">Scannez votre parcelle pour évaluer sa fertilité</p>
+  </header>
+
+  <form id="form-scan" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <input type="file" id="photo_camera" name="photo_sol"
+           accept="image/jpeg,image/png" capture="environment" class="sr-only">
+    <label for="photo_camera" id="zone" class="zone">
+      <span id="zone-contenu" class="zone-contenu">
+        <svg class="icone-camera" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 3 7.2 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9zm3 14.5A4.5 4.5 0 1 1 12 8.5a4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+        </svg>
+        <strong>Appuyez ici pour scanner le sol</strong>
+        <span class="zone-aide">avec l'appareil photo de votre téléphone</span>
+      </span>
+    </label>
+
+    <input type="file" id="photo_galerie" name="photo_sol"
+           accept="image/jpeg,image/png" class="sr-only">
+    <label for="photo_galerie" class="btn-secondaire">
+      ou choisir une photo du sol (JPG / PNG)
+    </label>
+
+    <p id="nom-fichier" class="nom-fichier" aria-live="polite">Aucune photo choisie</p>
+
+    <div id="message-erreur" class="alerte" role="alert" {% if not erreur %}hidden{% endif %}>{{ erreur }}</div>
+
+    <button type="submit" id="btn-analyser" class="btn-principal">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="txt">ANALYSER LE SOL</span>
+    </button>
+  </form>
+
+  {% if resultat %}
+  <section id="resultat" class="resultat {% if est_fertile %}fertile{% else %}pauvre{% endif %}"
+           aria-labelledby="titre-resultat">
+    <img src="{{ image_url }}" alt="Photo du sol analysée" class="photo-resultat">
+
+    <h2 id="titre-resultat" class="statut">
+      <span aria-hidden="true">{% if est_fertile %}🌱{% else %}🏜️{% endif %}</span>
+      Résultat : <strong>{{ statut }}</strong>
+    </h2>
+
+    <p class="confiance-texte">Taux de confiance : <strong>{{ confiance }} %</strong></p>
+    <div class="barre" role="img" aria-label="Taux de confiance {{ confiance }} pour cent">
+      <div class="barre-remplie" style="width: {{ confiance|stringformat:'.1f' }}%"></div>
+    </div>
+
+    {% if incertain %}
+    <p class="alerte attention">
+      <strong>Résultat peu sûr.</strong> Reprenez la photo de près, en plein jour,
+      sans ombre, en cadrant uniquement le sol.
+    </p>
+    {% endif %}
+
+    <p class="conseil"><strong>Conseil :</strong> {{ conseil }}</p>
+  </section>
+  {% endif %}
+
+  <aside class="mention" aria-label="Limites du diagnostic">
+    <strong>Indication visuelle uniquement.</strong>
+    Ce diagnostic estime l'aspect de surface du sol (couleur, texture, humidité).
+    Il ne remplace pas une analyse en laboratoire (pH, azote, phosphore, potassium).
+  </aside>
+
+  <details class="astuces">
+    <summary>Comment bien photographier le sol ?</summary>
+    <ul>
+      <li>Placez-vous en plein jour, sans ombre sur le sol.</li>
+      <li>Tenez le téléphone à environ 30 cm de la terre.</li>
+      <li>Cadrez uniquement le sol : ni plantes, ni pieds, ni ciel.</li>
+      <li>Retirez les feuilles et débris à la surface.</li>
+    </ul>
+  </details>
+
+</main>
+</body>
+</html>
